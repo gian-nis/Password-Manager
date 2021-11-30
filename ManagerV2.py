@@ -12,7 +12,7 @@ while manage_on:
     answer = input(prompt)
 
     answer = answer.upper()
-    # ^ asks user whether they want to make a password or look for one
+    
 
 
     def load_passwords():
@@ -26,17 +26,19 @@ while manage_on:
             elif answer == "LOOK FOR PASSWORD":
                 print("Sorry but there are no passwords available. Make a new one!")
                 return {}
-    # ^ function checks whether password dictionary is empty or not. If not then it will read dictionary
+    # ^ function that loads up the password dictionary from text file.
+    
     def delete_password(account_name):
         passwords = load_passwords()
         del passwords[account_name]
         return passwords
-
+    # ^ function for deleting password
+    
     def password_list(account_name, password_name):
         passwords = load_passwords()
         passwords[account_name] = password_name
         return passwords
-    # ^ load_password function gets passed into this function. account name and password get added
+    # ^ function for adding password
 
     if answer == "MAKE PASSWORD":
         account_name = input("What use is this password for? ").upper()
