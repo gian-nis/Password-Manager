@@ -26,7 +26,7 @@ while manage_on:
             elif answer == "LOOK FOR PASSWORD":
                 print("Sorry but there are no passwords available. Make a new one!")
                 return {}
-    # ^ function that loads up the password dictionary from text file.
+    # ^ function that loads up the password dictionary from text file and returns all the account and passwords saved.
     
     def delete_password(account_name):
         passwords = load_passwords()
@@ -41,9 +41,9 @@ while manage_on:
     # ^ function for adding password
 
     if answer == "MAKE PASSWORD":
-        account_name = input("What use is this password for? ").upper()
+        account_name = input("What use is this password for? ").upper() # < account_name is for subject associated with password
         password_name = input("What is the password? ")
-        passwords = password_list(account_name, password_name)
+        passwords = password_list(account_name, password_name) # < passwords is a dictionary containing account and password names. After this line, passwords has all the updated passwords.
         with open("passwords.txt", "w+") as f:
             f.write(json.dumps(passwords))
         print("Your password was saved!")
@@ -52,11 +52,11 @@ while manage_on:
     elif answer == "LOOK FOR PASSWORD":
         passwords = load_passwords()
 
-        if passwords:
+        if passwords: # < if passwords is not empty...
             search_account = input("What account is this password for? ").upper()
 
             if search_account in passwords:
-                print(f"The password is '{(passwords.get(search_account))}'.")
+                print(f"The password is '{(passwords.get(search_account))}'.") # < Retrieves password in dictionary associated with account name
             else:
                 print("Sorry, we can't find such name.")
 
@@ -64,9 +64,9 @@ while manage_on:
         passwords = load_passwords()
 
         try:
-            for keys, values in passwords.items():
-                print(f"Account: {keys}")
-                print(f"Password: {values}")
+            for keys, values in passwords.items(): # < For all account names and passwords in the dictionary (string form?)
+                print(f"Account: {keys}") # < account_name
+                print(f"Password: {values}") # < passwords
                 print("\n")
         except AttributeError:
             print("There are no passwords made yet. Make one!")
