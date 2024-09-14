@@ -7,7 +7,7 @@ import ast
 import logging
 
 
-def remember_pass(entry_box):
+def remember_pass(entry_box): # Long story short, this was the most convenient way to have global access to password/recovery code input
 
     global enc_key
 
@@ -20,16 +20,16 @@ def derive_key(input_string):
     return key
 
 
-def encrypt_key_box(binary):
+def encrypt_key_box(binary): # This screen verifies password/reciver and asks for key. 
 
-    check = ""
+    check = "" # On second though, could've just made it a boolean but it gets turned to "pass" if password or recovery passes
 
-    with open('loginkey.key', 'rb') as mykey:
+    with open('loginkey.key', 'rb') as mykey: # As said in the readme, this file stores your key to decrypt password login
         key = mykey.read()
 
     f = Fernet(key)
 
-    with open('enc_login.txt', 'rb') as encrypted_file:
+    with open('enc_login.txt', 'rb') as encrypted_file: # --v This whole block of code just decrypts your password and temporarily saves it in a file to be read and compared
         encrypted = encrypted_file.read()
 
     decrypted = f.decrypt(encrypted)
@@ -41,9 +41,9 @@ def encrypt_key_box(binary):
         dec_password = decrypted_file.read()  # cut off
 
     encrypted_file.close()
-    open("pass_temp.txt", "w").close()
+    open("pass_temp.txt", "w").close() # --------------------^
 
-    with open('enc_recovery.txt', 'rb') as encrypted_file:
+    with open('enc_recovery.txt', 'rb') as encrypted_file:  # --v This whole block of code just decrypts your recovery code and temporarily saves it in a file to be read and compared
         encrypted = encrypted_file.read()
 
     decrypted = f.decrypt(encrypted)
@@ -55,10 +55,10 @@ def encrypt_key_box(binary):
         dec_recovery = decrypted_file.read()  # cut off
 
     encrypted_file.close()
-    open("recovery_temp.txt", "w").close()
+    open("recovery_temp.txt", "w").close() # -------------------^
     mykey.close()
 
-    if binary == '0':
+    if binary == '0': # If we're working with password, set potential label of password label and check if inputted password checks out with decrypted password
 
         failed = ttk.Label(window, text='Wrong password. Try again')
         failed.place(x=230, y=200)
@@ -66,7 +66,7 @@ def encrypt_key_box(binary):
         if (entry.get() == dec_password):
             check = "pass"
 
-    elif binary == '1':
+    elif binary == '1': # If we're working with recovery code, set potential label of recovery code label and check if inputted recovery code checks out with decrypted recovery code
 
         failed = ttk.Label(program2, text='Wrong recovery code. Try again')
         failed.place(x=220, y=200)
@@ -74,7 +74,7 @@ def encrypt_key_box(binary):
         if (entry2.get() == dec_recovery):
             check = "pass"
 
-    if check == "pass":
+    if check == "pass": # If a success, open box that prompts for key.
 
         if binary == '1':
             program2.destroy()
@@ -102,7 +102,7 @@ def encrypt_key_box(binary):
 
 
 
-def both_codes():
+def both_codes(): # This function creates the window that displays your generated recovery code and key.
     codes_file = tk.Toplevel()
     codes_file.protocol("WM_DELETE_WINDOW", on_close)
     codes_file.title('Password Manager')
@@ -174,13 +174,13 @@ def save_login():
     with open('enc_login.txt', 'wb') as encrypted_file: # write encrypted password into enc login file
         encrypted_file.write(encrypted_login)
 
-    open("pass_temp.txt", "w").close()
+    open("pass_temp.txt", "w").close() #clear text file so that password cannot be seen in plain text
 
     mykey.close()
     encrypted_file.close()
 
 
-def intro_box():
+def intro_box(): # Window that simply asks for user to create a password
     intro_file = tk.Toplevel()
     intro_file.protocol("WM_DELETE_WINDOW", on_close)
     intro_file.title('Password Manager')
@@ -280,7 +280,7 @@ def treeview_password_box():
         logging.error(f"An unexpected error occurred: {general_exception}")
 
 
-def delete_password(box_name):
+def delete_password(box_name): # This follows the same principle of adding password besides the middle portion
     username = user_box.get()
     password = password_box.get()
 
@@ -300,7 +300,7 @@ def delete_password(box_name):
 
         remaining_tuples = []
 
-        with open('dec_registry.txt', 'r') as file:
+        with open('dec_registry.txt', 'r') as file: 
             for line in file:
                 line = line.strip()  # Remove leading/trailing whitespace or newline characters
 
@@ -343,7 +343,7 @@ def delete_password(box_name):
     box_name.after(3000, done.destroy)
 
 
-def delete_password_box():
+def delete_password_box(): # Prompts user to input username and password to delete.
     delete_file = tk.Toplevel()
     delete_file.protocol("WM_DELETE_WINDOW", on_close)
     delete_file.title('Password Manager')
@@ -369,38 +369,38 @@ def delete_password_box():
     button1.place(x=260, y=205)
 
 
-def add_password(box_name):
+def add_password(box_name): # Process of adding password to manager
     username = user_box.get()
 
     password = password_box.get()
 
     password_tuple = (username, password)
 
-    base64_key = derive_key(enc_key)
+    base64_key = derive_key(enc_key) # her we encode the key manually inputted
 
     f = Fernet(base64_key)
 
     with open('enc_registry.txt', 'rb') as encrypted_file:
         encrypted = encrypted_file.read()
 
-    if len(encrypted) == 0:
+    if len(encrypted) == 0: # this check is necessary as encrypting an empty string results in a crash
 
-        with open('dec_registry.txt', 'a') as decrypted_file:
+        with open('dec_registry.txt', 'a') as decrypted_file: # store in password and username as plain text
             decrypted_file.write(str(password_tuple))
 
-        with open('dec_registry.txt', 'rb') as original_file:
+        with open('dec_registry.txt', 'rb') as original_file: # read it in bytes to encrypt/decrypt
             original = original_file.read()
 
         encrypted = f.encrypt(original)
 
-        with open('enc_registry.txt', 'wb') as encrypted_file:
+        with open('enc_registry.txt', 'wb') as encrypted_file: # store encrypted info
             encrypted_file.write(encrypted)
 
-        open("dec_registry.txt", "wb").close()
+        open("dec_registry.txt", "wb").close() # clear plain text info
 
         encrypted_file.close()
 
-    else:
+    else: # this is basically the same process except we include a new line since there is already info in our encrypted file
 
         decrypted = f.decrypt(encrypted)
 
@@ -427,7 +427,7 @@ def add_password(box_name):
     box_name.after(3000, done.destroy)
 
 
-def add_password_box():
+def add_password_box(): # Prompts user to input a username and password.
     add_file = tk.Toplevel()
     add_file.protocol("WM_DELETE_WINDOW", on_close)
     add_file.title('Password Manager')
@@ -453,7 +453,7 @@ def add_password_box():
     button1.place(x=260, y=205)
 
 
-def view_password_box():
+def view_password_box(): # Now seeing this, this function actually does nothing since i didnt call it anywhere... probably like a prototype of the actual password viewing box
     view_files = tk.Toplevel()
     view_files.protocol("WM_DELETE_WINDOW", on_close)
     view_files.title('Password Manager')
@@ -464,11 +464,11 @@ def view_password_box():
     table.pack()
 
 
-def on_close():
+def on_close(): # Necessary to make it so program closes when X (close button) is pressed.
     window.destroy()
 
 
-def sizer(frame, width, height):
+def sizer(frame, width, height): # This is to have the windows centered at all times
     frame.minsize(width, height)
     frame.maxsize(width, height)
 
@@ -481,7 +481,7 @@ def sizer(frame, width, height):
     frame.geometry(f'{width}x{height}+{left}+{top}')
 
 
-def frame1():
+def frame1(): # This windows displays your three options with password management in the program
     global program
 
     program = tk.Toplevel()
@@ -508,7 +508,7 @@ def frame1():
     view_passwords.place(x=0, y=270, height=230, width=800)
 
 
-def frame2():
+def frame2(): # This is the second login screen for recovery code input instead of password
     global program2
     global entry2
     window.withdraw()
@@ -523,7 +523,7 @@ def frame2():
     entry2 = ttk.Entry(program2)
 
     button = ttk.Button(program2, text='Back to password', command=lambda: [program2.destroy(), window.deiconify()])
-    button2 = ttk.Button(program2, text='Login', command=lambda: [encrypt_key_box('1')])
+    button2 = ttk.Button(program2, text='Login', command=lambda: [encrypt_key_box('1')]) # This button takes you to the next screen that verifies password and asks for key. Input 1 is to verify recovery code
 
     label.place(x=268, y=90)
     entry2.place(x=205, y=115, width=200)
@@ -531,16 +531,16 @@ def frame2():
     button2.place(x=309, y=145, width=97)
 
 
-def mainframe():
+def mainframe(): # This is the login screen
     global window
     global entry
     window = tk.Tk()
     window.title('Password Manager')
 
-    with open('Key Receipt.txt', 'r') as pinNumber:
+    with open('Key Receipt.txt', 'r') as pinNumber: # the purpose of 'Key Receipt.txt' is to let the program know that if a password has already been created for login, then do not prompt that box again.
         pinnum = pinNumber.read()
 
-    if pinnum == '0':
+    if pinnum == '0': # Here, if there is a 0 in 'Key Receipt.txt', then no password has been created. It changes to 1 later in code
         window.withdraw()
         intro_box()
 
@@ -552,7 +552,7 @@ def mainframe():
     entry = ttk.Entry(window)
 
     button = ttk.Button(window, text='Use recovery key', command=frame2)
-    button2 = ttk.Button(window, text='Login', command=lambda: [encrypt_key_box('0')])
+    button2 = ttk.Button(window, text='Login', command=lambda: [encrypt_key_box('0')]) # This button takes you to the next screen that verifies password and asks for key. Input 0 is to verify password
 
     label.place(x=274, y=90)
     entry.place(x=205, y=115, width=200)
