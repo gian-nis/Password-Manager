@@ -7,10 +7,6 @@ import ast
 import logging
 
 
-# Add a "login" button to the both_codes()
-# In program, userTest and passwordTest does not work
-# Actually, considering that all files must be created to start with, at least i think, remove the file path code that checks for existance
-
 def remember_pass(entry_box):
 
     global enc_key
